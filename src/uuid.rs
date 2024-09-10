@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Uuid(String);
 
+// TODO: Figure out how to programatically determine character, instead of looking up in char_set.
 const CHAR_SET: &[char] = &[
     // Numbers
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', //
