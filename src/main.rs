@@ -18,6 +18,7 @@ mod ctx;
 mod error;
 mod log;
 mod middleware;
+mod response;
 mod uuid;
 
 #[tokio::main]
