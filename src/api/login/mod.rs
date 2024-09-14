@@ -1,5 +1,5 @@
 use crate::api;
-use crate::{Error, Result};
+use crate::{APIError, Result};
 use axum::routing::post;
 use axum::{Json, Router};
 use serde::Deserialize;
@@ -15,7 +15,7 @@ async fn api_login(cookies: Cookies, payload: Json<LoginPayload>) -> Result<Json
 
     // TODO: Implement real db/auth logic.
     if payload.username != "demo1" || payload.pwd != "welcome" {
-        return Err(Error::LoginFail);
+        return Err(APIError::LoginFail);
     }
 
     // FIXME: Implement real auth-token generation/signature.

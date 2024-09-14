@@ -1,6 +1,6 @@
 use crate::api::AUTH_TOKEN;
 use crate::ctx::Ctx;
-use crate::{Error, Result};
+use crate::{APIError, Result};
 use axum::body::Body;
 use axum::extract::{FromRequestParts, Request};
 use axum::http::request::Parts;
@@ -28,7 +28,7 @@ pub async fn mw_ctx_resolver(
 
     // Compute Result<Ctx>.
     let result_ctx = match auth_token
-        .ok_or(Error::AuthFailNoAuthTokenCookie)
+        .ok_or(APIError::AuthFailNoAuthTokenCookie)
         .and_then(parse_token)
     {
         Ok((user_id, _exp, _sign)) => {
@@ -40,7 +40,7 @@ pub async fn mw_ctx_resolver(
     };
 
     // Remove the cookie if something went wrong other than NoAuthTokenCookie.
-    if result_ctx.is_err() && !matches!(result_ctx, Err(Error::AuthFailNoAuthTokenCookie)) {
+    if result_ctx.is_err() && !matches!(result_ctx, Err(APIError::AuthFailNoAuthTokenCookie)) {
         cookies.remove(Cookie::from(AUTH_TOKEN));
     }
 
@@ -52,7 +52,7 @@ pub async fn mw_ctx_resolver(
 
 #[async_trait::async_trait]
 impl<S: Send + Sync> FromRequestParts<S> for Ctx {
-    type Rejection = Error;
+    type Rejection = APIError;
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self> {
         println!("->> {:<12} - Ctx", "EXTRACTOR");
@@ -60,18 +60,18 @@ impl<S: Send + Sync> FromRequestParts<S> for Ctx {
         parts
             .extensions
             .get::<Result<Ctx>>()
-            .ok_or(Error::AuthFailCtxNotInRequestExt)?
+            .ok_or(APIError::AuthFailCtxNotInRequestExt)?
             .clone()
     }
 }
 
 fn parse_token(token: String) -> Result<(u64, String, String)> {
     let (_whole, user_id, exp, sign) = regex_captures!(r#"^user-(\d+)\.(.+)\.(.+)"#, &token)
-        .ok_or(Error::AuthFailTokenWrongFormat)?;
+        .ok_or(APIError::AuthFailTokenWrongFormat)?;
 
     let user_id = user_id
         .parse::<u64>()
-        .map_err(|_| Error::AuthFailTokenWrongFormat)?;
+        .map_err(|_| APIError::AuthFailTokenWrongFormat)?;
 
     Ok((user_id, exp.to_string(), sign.to_string()))
 }

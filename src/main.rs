@@ -6,11 +6,12 @@ use axum::{
 };
 use ctx::Ctx;
 use log::log_request;
+use response::action::RequestAction;
 use serde_json::json;
 use tower_cookies::CookieManagerLayer;
 
 // Re-export Error and Result
-pub use self::error::{Error, Result};
+pub use self::error::{APIError, Result};
 
 mod api;
 mod ctx;
@@ -46,9 +47,11 @@ async fn main_response_mapper(
     let uuid = uuid::Uuid::new();
 
     // Get the eventual response error.
-    let service_error = res.extensions().get::<Error>();
+    let service_error = res.extensions().get::<APIError>();
 
     let client_status_error = service_error.map(|se| se.client_status_and_error());
+
+    let actions = res.extensions().get::<Vec<RequestAction>>();
 
     // If we have a client error, build a new response.
 
@@ -56,10 +59,11 @@ async fn main_response_mapper(
         .as_ref()
         .map(|(status_code, client_error)| {
             let client_error_body = json!({
+                "req_uuid": uuid.to_string(),
                 "error": {
                     "type": client_error.as_ref(),
-                    "req_uuid": uuid.to_string(),
-                }
+                },
+                "actions": actions.unwrap_or(&Vec::new()),
             });
 
             println!("   ->> client_error_body: {client_error_body}");

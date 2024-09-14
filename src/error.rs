@@ -1,11 +1,11 @@
 use axum::{http::StatusCode, response::IntoResponse};
 use serde::Serialize;
 
-pub type Result<T> = core::result::Result<T, Error>;
+pub type Result<T> = core::result::Result<T, APIError>;
 
 #[derive(Clone, Debug, Serialize)]
 #[serde(tag = "type", content = "data")]
-pub enum Error {
+pub enum APIError {
     LoginFail,
 
     // TODO: Add more errors
@@ -14,7 +14,7 @@ pub enum Error {
     AuthFailCtxNotInRequestExt,
 }
 
-impl Error {
+impl APIError {
     pub fn client_status_and_error(&self) -> (StatusCode, ClientError) {
         #[allow(unreachable_patterns)]
         match self {
@@ -35,7 +35,7 @@ impl Error {
     }
 }
 
-impl IntoResponse for Error {
+impl IntoResponse for APIError {
     fn into_response(self) -> axum::response::Response {
         println!("->> {:<12} - {self:?}", "INTO_RES");
 
@@ -49,13 +49,13 @@ impl IntoResponse for Error {
     }
 }
 
-impl std::fmt::Display for Error {
+impl std::fmt::Display for APIError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(fmt, "{self:?}")
     }
 }
 
-impl std::error::Error for Error {}
+impl std::error::Error for APIError {}
 
 #[derive(Debug, strum_macros::AsRefStr)]
 #[allow(non_camel_case_types)]
