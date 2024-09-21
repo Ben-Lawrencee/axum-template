@@ -10,7 +10,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Uuid(String);
 
-// TODO: Figure out how to programatically determine character, instead of looking up in char_set.
 const CHAR_SET: &[char] = &[
     // Numbers
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', //
@@ -49,10 +48,10 @@ impl Uuid {
     /// The following structure is generated:
     /// xxxxx-xxxxx-xxxxx-xxxxx
     pub fn generate() -> String {
-        let mut rng = ChaCha20Rng::from_seed(Default::default());
+        let mut rng = ChaCha20Rng::from_entropy();
 
         // Creates a buffer on the stack for the random bytes
-        let mut buffer = [0u8; 20];
+        let mut buffer = [0u8; 23];
 
         // Fill the buffer with random bytes
         rng.fill_bytes(&mut buffer);
@@ -70,9 +69,6 @@ impl Uuid {
         identifier[5] = '-';
         identifier[11] = '-';
         identifier[17] = '-';
-
-        // This generates the following structure:
-        // xxxxx-xxxxx-xxxxx-xxxxx
 
         identifier.iter().collect::<String>()
     }
