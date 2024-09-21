@@ -14,3 +14,21 @@ pub struct RequestAction {
     pub url: String,
     pub method: HTTPMethod,
 }
+
+impl RequestAction {
+    pub fn new(
+        uuid: Uuid,
+        title: String,
+        description: String,
+        url: String,
+        method: HTTPMethod,
+    ) -> Self {
+        Self {
+            uuid: Some(uuid),
+            title,
+            description,
+            url,
+            method,
+        }
+    }
+}
