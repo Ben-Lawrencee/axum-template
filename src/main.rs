@@ -9,6 +9,7 @@ use log::log_request;
 use response::action::RequestAction;
 use serde_json::json;
 use tower_cookies::CookieManagerLayer;
+use uuid::Uuid;
 
 // Re-export Error and Result
 pub use self::error::{APIError, Result};
@@ -24,7 +25,7 @@ mod uuid;
 #[tokio::main]
 async fn main() {
     let routes_hello = Router::new()
-        .nest("/api", api::router())
+        .nest("/api/v1/", api::router())
         .layer(mw::map_response(main_response_mapper))
         .layer(mw::from_fn(middleware::mw_auth::mw_ctx_resolver))
         .layer(CookieManagerLayer::new());
@@ -45,7 +46,7 @@ async fn main_response_mapper(
 ) -> Response {
     println!("->> {:<12} - main_response_mapper", "RES_MAPPER");
 
-    let uuid = uuid::Uuid::new();
+    let uuid = Uuid::new_prefixed("req");
 
     // Get the eventual response error.
     let service_error = res.extensions().get::<APIError>();

@@ -7,7 +7,7 @@ use serde_json::{json, Value};
 use tower_cookies::{Cookie, Cookies};
 
 pub fn router() -> Router {
-    Router::new().route("/api/login", post(api_login))
+    Router::new().route("/", post(api_login))
 }
 
 async fn api_login(cookies: Cookies, payload: Json<LoginPayload>) -> Result<Json<Value>> {
