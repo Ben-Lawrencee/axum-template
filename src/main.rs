@@ -24,7 +24,7 @@ mod uuid;
 
 #[tokio::main]
 async fn main() {
-    let routes_hello = Router::new()
+    let api_router = Router::new()
         .nest("/api/v1/", api::router())
         .layer(mw::map_response(main_response_mapper))
         .layer(mw::from_fn(middleware::mw_auth::mw_ctx_resolver))
@@ -35,7 +35,7 @@ async fn main() {
         .await
         .unwrap();
 
-    axum::serve(listener, routes_hello).await.unwrap();
+    axum::serve(listener, api_router).await.unwrap();
 }
 
 async fn main_response_mapper(

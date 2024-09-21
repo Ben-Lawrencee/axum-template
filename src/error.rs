@@ -1,6 +1,7 @@
 use axum::{http::StatusCode, response::IntoResponse};
 use serde::Serialize;
 
+/// The API Result type.
 pub type Result<T> = core::result::Result<T, APIError>;
 
 #[derive(Clone, Debug, Serialize)]

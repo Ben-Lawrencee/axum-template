@@ -1,6 +1,7 @@
 use crate::api::AUTH_TOKEN;
 use crate::ctx::Ctx;
 use crate::{APIError, Result};
+
 use axum::body::Body;
 use axum::extract::{FromRequestParts, Request};
 use axum::http::request::Parts;
@@ -9,6 +10,7 @@ use axum::response::Response;
 use lazy_regex::regex_captures;
 use tower_cookies::{Cookie, Cookies};
 
+/// Middleware which ensures that the request has valid authentication.
 pub async fn mw_require_auth(ctx: Result<Ctx>, req: Request<Body>, next: Next) -> Result<Response> {
     println!("->> {:<12} - mw_require_auth", "MIDDLEWARE");
 
@@ -17,6 +19,7 @@ pub async fn mw_require_auth(ctx: Result<Ctx>, req: Request<Body>, next: Next) -
     Ok(next.run(req).await)
 }
 
+/// Middleware which resolves the context from the request.
 pub async fn mw_ctx_resolver(
     cookies: Cookies,
     mut req: Request<Body>,
@@ -65,6 +68,7 @@ impl<S: Send + Sync> FromRequestParts<S> for Ctx {
     }
 }
 
+/// Parses the token string into its components.
 fn parse_token(token: String) -> Result<(u64, String, String)> {
     let (_whole, user_id, exp, sign) = regex_captures!(r#"^user-(\d+)\.(.+)\.(.+)"#, &token)
         .ok_or(APIError::AuthFailTokenWrongFormat)?;
