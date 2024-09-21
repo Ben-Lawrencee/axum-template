@@ -42,7 +42,7 @@ pub async fn log_request(
         error_data,
     };
 
-    println!("   ->> log_request: \n{}", json!(log_line));
+    println!("->> {:<12} - {}", "REQUEST_LOG", json!(log_line));
 
     // TODO - Send to cloud-watch.
 
