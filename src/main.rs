@@ -30,7 +30,7 @@ async fn main() {
         .layer(mw::from_fn(middleware::mw_auth::mw_ctx_resolver))
         .layer(CookieManagerLayer::new());
 
-    // run our app with hyper, listening globally on port 3000
+    // Listening on port 3000
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
         .await
         .unwrap();
@@ -79,5 +79,6 @@ async fn main_response_mapper(
 
     println!();
 
+    // Forward the error response, or the original response.
     error_response.unwrap_or(res)
 }
