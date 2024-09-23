@@ -1,10 +1,8 @@
-use axum::{http::Method, middleware, routing::get, Json, Router};
-use serde_json::{json, Value};
+use axum::{extract::NestedPath, http::Method, middleware, routing::get, Router};
 
 use crate::{
     middleware::mw_auth,
-    response::{action::RequestAction, method::HTTPMethod},
-    uuid::Uuid,
+    response::{action::RequestAction, APIResponse},
 };
 
 pub fn router() -> Router {
@@ -16,17 +14,11 @@ pub fn router() -> Router {
 
 // TODO: Implement your routes here.
 
-async fn get_notes() -> Json<Value> {
-    Json(json!({
-        "data": [],
-        "actions": [
-            RequestAction::new(
-                Uuid::new_prefixed("act"),
-                "Create a note".to_string(),
-                "Create a new note in one of your collections.".to_string(),
-                "/notes".to_string(),
-                HTTPMethod::new(Method::POST)
-            )
-        ]
-    }))
+async fn get_notes(path: NestedPath) -> APIResponse<Vec<u16>> {
+    APIResponse::new(vec![]).with_action(RequestAction::new(
+        "Get notes",
+        "Get all the users notes.",
+        format!("{}/", path.as_str()),
+        Method::GET,
+    ))
 }

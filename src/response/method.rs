@@ -4,7 +4,7 @@ use axum::http::Method;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct HTTPMethod(Method);
 
 impl HTTPMethod {
