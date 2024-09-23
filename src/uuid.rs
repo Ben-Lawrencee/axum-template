@@ -17,7 +17,7 @@ pub struct Raw;
 pub struct Prefixed;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct Uuid<Type = Raw> {
+pub struct Uuid<Type = Prefixed> {
     inner: String,
     prefix: Option<String>,
     variant: PhantomData<Type>,
@@ -67,9 +67,10 @@ impl Uuid<Prefixed> {
         self.prefix.as_deref().unwrap()
     }
 
-    pub fn without_prefix(&self) -> Uuid<Raw> {
+    /// Converts uuid into a raw uuid by removing the prefix.
+    pub fn without_prefix(self) -> Uuid<Raw> {
         Uuid {
-            inner: self.inner.clone(),
+            inner: self.inner,
             prefix: None,
             variant: PhantomData,
         }
@@ -77,6 +78,7 @@ impl Uuid<Prefixed> {
 }
 
 impl Uuid<Raw> {
+    /// Adds a prefix to a raw uuid.
     pub fn with_prefix(self, prefix: impl Into<String>) -> Uuid<Prefixed> {
         Uuid {
             inner: self.inner,
@@ -129,7 +131,7 @@ impl<Type> Uuid<Type> {
 
 impl Default for Uuid<Raw> {
     fn default() -> Self {
-        Self::raw()
+        Uuid::raw()
     }
 }
 

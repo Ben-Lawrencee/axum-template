@@ -2,11 +2,11 @@ use axum::http::Method;
 use serde::{Deserialize, Serialize};
 
 use super::method::HTTPMethod;
-use crate::uuid::Uuid;
+use crate::uuid::{Prefixed, Uuid};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct RequestAction {
-    pub uuid: Uuid,
+    pub uuid: Uuid<Prefixed>,
 
     pub title: String,
     pub description: String,
@@ -27,11 +27,9 @@ impl RequestAction {
         method: Method,
     ) -> Self {
         Self {
-            uuid: Uuid::raw(),
-
+            uuid: Uuid::prefixed("action"),
             title: title.into(),
             description: description.into(),
-
             url: url.into(),
             method: HTTPMethod::new(method),
         }
@@ -40,7 +38,7 @@ impl RequestAction {
 
 #[derive(Debug, Clone, Default)]
 pub struct ResponseActionBuilder {
-    uuid: Option<Uuid>,
+    uuid: Option<Uuid<Prefixed>>,
 
     title: Option<String>,
     description: Option<String>,
@@ -62,7 +60,7 @@ impl ResponseActionBuilder {
         }
     }
 
-    pub fn with_uuid(mut self, uuid: Uuid) -> Self {
+    pub fn with_uuid(mut self, uuid: Uuid<Prefixed>) -> Self {
         self.uuid = Some(uuid);
         self
     }
@@ -89,7 +87,7 @@ impl ResponseActionBuilder {
 
     pub fn build(self) -> RequestAction {
         RequestAction {
-            uuid: self.uuid.unwrap_or(Uuid::raw()),
+            uuid: self.uuid.unwrap_or(Uuid::prefixed("action")),
             title: self.title.unwrap(),
             description: self.description.unwrap(),
             url: self.url.unwrap(),
