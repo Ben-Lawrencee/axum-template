@@ -1,5 +1,8 @@
 use core::str;
-use std::fmt::Display;
+use std::{
+    fmt::{Display, Formatter, Result},
+    marker::PhantomData,
+};
 
 use rand_chacha::{
     rand_core::{RngCore, SeedableRng},
@@ -7,8 +10,15 @@ use rand_chacha::{
 };
 use serde::{Deserialize, Serialize};
 
+pub struct Raw;
+pub struct Prefixed;
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct Uuid(String);
+pub struct Uuid<Type = Raw> {
+    inner: String,
+    prefix: Option<String>,
+    variant: PhantomData<Type>,
+}
 
 const CHAR_SET: &[char] = &[
     // Numbers
@@ -25,20 +35,55 @@ const CHAR_SET: &[char] = &[
 
 impl Uuid {
     /// Creates a new prefixed UUID identifier.
-    pub fn prefixed(prefix: impl Into<String>) -> Self {
+    pub fn prefixed(prefix: impl Into<String>) -> Uuid<Prefixed> {
         let identifier = Self::generate();
 
         // prfx:12345-abcdf-GHIJK-lMn0p
 
-        let uuid = prefix.into() + ":" + &identifier;
-        Self(uuid)
+        Uuid {
+            inner: identifier,
+            prefix: Some(prefix.into()),
+            variant: PhantomData,
+        }
     }
 
     /// Creates a new UUID identifier.
-    pub fn new() -> Self {
-        Self(Self::generate())
+    pub fn new() -> Uuid<Raw> {
+        Uuid {
+            inner: Self::generate(),
+            prefix: None,
+            variant: PhantomData,
+        }
+    }
+}
+
+impl Uuid<Prefixed> {
+    /// Gets the prefix of the UUID.
+    pub fn get_prefix(&self) -> &str {
+        // Should never be None.
+        self.prefix.as_deref().unwrap()
     }
 
+    pub fn without_prefix(&self) -> Uuid<Raw> {
+        Uuid {
+            inner: self.inner.clone(),
+            prefix: None,
+            variant: PhantomData,
+        }
+    }
+}
+
+impl Uuid<Raw> {
+    pub fn with_prefix(self, prefix: impl Into<String>) -> Uuid<Prefixed> {
+        Uuid {
+            inner: self.inner,
+            prefix: Some(prefix.into()),
+            variant: PhantomData,
+        }
+    }
+}
+
+impl<Type> Uuid<Type> {
     /// Generates a new UUID identifier.
     /// This is a character array of the length 23.
     ///
@@ -73,27 +118,40 @@ impl Uuid {
         identifier.iter().collect::<String>()
     }
 
-    pub fn as_str(&self) -> &str {
-        self.0.as_str()
-    }
-
-    pub fn take(self) -> String {
-        self.0
+    /// Gets the identifier of the UUID.
+    pub fn get_identifier(&self) -> &str {
+        &self.inner
     }
 
     pub fn as_bytes(&self) -> &[u8] {
-        self.0.as_bytes()
+        self.inner.as_bytes()
+    }
+
+    pub fn to_string(self) -> String {
+        match self.prefix {
+            Some(prefix) => format!("{}:{}", prefix, self.inner),
+            None => self.inner,
+        }
+    }
+}
+
+impl Default for Uuid<Raw> {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
 impl From<Uuid> for String {
     fn from(val: Uuid) -> Self {
-        val.0
+        val.to_string()
     }
 }
 
 impl Display for Uuid {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        match &self.prefix {
+            Some(prefix) => write!(f, "{}:{}", prefix, self.inner),
+            None => write!(f, "{}", self.inner),
+        }
     }
 }
