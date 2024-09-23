@@ -25,7 +25,7 @@ const CHAR_SET: &[char] = &[
 
 impl Uuid {
     /// Creates a new prefixed UUID identifier.
-    pub fn new_prefixed(prefix: impl Into<String>) -> Self {
+    pub fn prefixed(prefix: impl Into<String>) -> Self {
         let identifier = Self::generate();
 
         // prfx:12345-abcdf-GHIJK-lMn0p

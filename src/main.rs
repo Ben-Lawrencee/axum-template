@@ -46,7 +46,7 @@ async fn main_response_mapper(
 ) -> Response {
     println!("->> {:<12} - main_response_mapper", "RES_MAPPER");
 
-    let uuid = Uuid::new_prefixed("req");
+    let uuid = Uuid::prefixed("req");
 
     // Get the eventual response error.
     let service_error = res.extensions().get::<APIError>();
