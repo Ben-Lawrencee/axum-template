@@ -10,7 +10,10 @@ use rand_chacha::{
 };
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Raw;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Prefixed;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -48,7 +51,7 @@ impl Uuid {
     }
 
     /// Creates a new UUID identifier.
-    pub fn new() -> Uuid<Raw> {
+    pub fn raw() -> Uuid<Raw> {
         Uuid {
             inner: Self::generate(),
             prefix: None,
@@ -122,32 +125,21 @@ impl<Type> Uuid<Type> {
     pub fn get_identifier(&self) -> &str {
         &self.inner
     }
-
-    pub fn as_bytes(&self) -> &[u8] {
-        self.inner.as_bytes()
-    }
-
-    pub fn to_string(self) -> String {
-        match self.prefix {
-            Some(prefix) => format!("{}:{}", prefix, self.inner),
-            None => self.inner,
-        }
-    }
 }
 
 impl Default for Uuid<Raw> {
     fn default() -> Self {
-        Self::new()
+        Self::raw()
     }
 }
 
-impl From<Uuid> for String {
-    fn from(val: Uuid) -> Self {
+impl<Type> From<Uuid<Type>> for String {
+    fn from(val: Uuid<Type>) -> Self {
         val.to_string()
     }
 }
 
-impl Display for Uuid {
+impl<Type> Display for Uuid<Type> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match &self.prefix {
             Some(prefix) => write!(f, "{}:{}", prefix, self.inner),

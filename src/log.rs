@@ -8,8 +8,8 @@ use serde_with::skip_serializing_none;
 use crate::{ctx::Ctx, error::ClientError, uuid::Uuid};
 use crate::{APIError, Result};
 
-pub async fn log_request(
-    uuid: Uuid,
+pub async fn log_request<UUIDType>(
+    uuid: Uuid<UUIDType>,
     req_method: Method,
     uri: Uri,
     ctx: Option<Ctx>,

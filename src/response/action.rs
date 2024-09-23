@@ -27,7 +27,7 @@ impl RequestAction {
         method: Method,
     ) -> Self {
         Self {
-            uuid: Uuid::new(),
+            uuid: Uuid::raw(),
 
             title: title.into(),
             description: description.into(),
@@ -89,7 +89,7 @@ impl ResponseActionBuilder {
 
     pub fn build(self) -> RequestAction {
         RequestAction {
-            uuid: self.uuid.unwrap_or(Uuid::new()),
+            uuid: self.uuid.unwrap_or(Uuid::raw()),
             title: self.title.unwrap(),
             description: self.description.unwrap(),
             url: self.url.unwrap(),
